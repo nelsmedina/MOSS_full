@@ -1562,8 +1562,14 @@ class InteractiveTrainingPage(QWidget):
 
         # Auto-rename masks in masks/ folder if they don't match mask_XXXXX.tif pattern
         # This handles the case where users copy-paste prediction masks with different names
+        # e.g. mask_xy0000.tif, prediction_001.tif, etc.
         if self.masks_dir and self.masks_dir.exists():
-            existing_standard = list(self.masks_dir.glob("mask_*.tif"))
+            import re
+            expected_pattern = re.compile(r'^mask_\d{5}\.tif$')
+            existing_standard = [
+                f for f in self.masks_dir.iterdir()
+                if expected_pattern.match(f.name)
+            ]
             if len(existing_standard) == 0:
                 all_mask_files = sorted([
                     f for f in self.masks_dir.iterdir()
