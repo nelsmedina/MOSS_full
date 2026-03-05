@@ -1426,6 +1426,8 @@ class InteractiveTrainingPage(QWidget):
         # If zarr mode needs initial display, load the first slice
         if hasattr(self, '_zarr_needs_display') and self._zarr_needs_display:
             if self.use_zarr and self.zarr_source is not None and self.image_files:
+                # Auto-rename non-standard masks before first display
+                self._normalize_mask_filenames()
                 # Load the current slice
                 self.load_current_slice()
                 # Update status
@@ -1560,41 +1562,7 @@ class InteractiveTrainingPage(QWidget):
             elif len(mask_files) > 0:
                 print(f"[TrainingMasks] WARNING: Mask count ({len(mask_files)}) != image count ({len(self.image_files)}), ignoring training masks")
 
-        # Auto-rename masks in masks/ folder if they don't match mask_XXXXX.tif pattern
-        # This handles the case where users copy-paste prediction masks with different names
-        # e.g. mask_xy0000.tif, prediction_001.tif, etc.
-        if self.masks_dir and self.masks_dir.exists():
-            import re
-            expected_pattern = re.compile(r'^mask_\d{5}\.tif$')
-            existing_standard = [
-                f for f in self.masks_dir.iterdir()
-                if expected_pattern.match(f.name)
-            ]
-            if len(existing_standard) == 0:
-                all_mask_files = sorted([
-                    f for f in self.masks_dir.iterdir()
-                    if f.suffix.lower() in ('.tif', '.tiff', '.png', '.jpg', '.jpeg')
-                ])
-                if len(all_mask_files) > 0 and len(all_mask_files) == len(self.image_files):
-                    print(f"[Masks] Found {len(all_mask_files)} non-standard mask files, renaming to mask_XXXXX.tif...")
-                    for idx, src in enumerate(all_mask_files):
-                        dst = self.masks_dir / f"mask_{idx:05d}.tif"
-                        try:
-                            if src.suffix.lower() in ('.tif', '.tiff'):
-                                src.rename(dst)
-                            else:
-                                mask = np.array(Image.open(src))
-                                if mask.ndim == 3:
-                                    mask = mask[:, :, 0]
-                                if mask.max() > 0 and mask.max() <= 1:
-                                    mask = (mask * 255).astype(np.uint8)
-                                else:
-                                    mask = mask.astype(np.uint8)
-                                Image.fromarray(mask).save(dst, compression='tiff_lzw')
-                                src.unlink()
-                        except Exception as e:
-                            print(f"[Masks] Error renaming {src.name}: {e}")
-                    print(f"[Masks] Renamed {len(all_mask_files)} masks")
+        self._normalize_mask_filenames()
 
         # Clear existing data
         self.images = {}
@@ -1897,6 +1865,51 @@ class InteractiveTrainingPage(QWidget):
 
         thread = threading.Thread(target=prefetch, daemon=True)
         thread.start()
+
+    def _normalize_mask_filenames(self):
+        """Rename mask files in masks/ folder to mask_XXXXX.tif if needed.
+
+        Handles the case where users copy-paste prediction masks with
+        non-standard names (e.g. mask_xy0000.tif, prediction_001.tif).
+        """
+        if not self.masks_dir or not self.masks_dir.exists() or not self.image_files:
+            return
+
+        import re
+        expected_pattern = re.compile(r'^mask_\d{5}\.tif$')
+        existing_standard = [
+            f for f in self.masks_dir.iterdir()
+            if expected_pattern.match(f.name)
+        ]
+        if len(existing_standard) > 0:
+            return  # Already have properly named masks
+
+        all_mask_files = sorted([
+            f for f in self.masks_dir.iterdir()
+            if f.suffix.lower() in ('.tif', '.tiff', '.png', '.jpg', '.jpeg')
+        ])
+        if len(all_mask_files) == 0 or len(all_mask_files) != len(self.image_files):
+            return
+
+        print(f"[Masks] Found {len(all_mask_files)} non-standard mask files, renaming to mask_XXXXX.tif...")
+        for idx, src in enumerate(all_mask_files):
+            dst = self.masks_dir / f"mask_{idx:05d}.tif"
+            try:
+                if src.suffix.lower() in ('.tif', '.tiff'):
+                    src.rename(dst)
+                else:
+                    mask = np.array(Image.open(src))
+                    if mask.ndim == 3:
+                        mask = mask[:, :, 0]
+                    if mask.max() > 0 and mask.max() <= 1:
+                        mask = (mask * 255).astype(np.uint8)
+                    else:
+                        mask = mask.astype(np.uint8)
+                    Image.fromarray(mask).save(dst, compression='tiff_lzw')
+                    src.unlink()
+            except Exception as e:
+                print(f"[Masks] Error renaming {src.name}: {e}")
+        print(f"[Masks] Renamed {len(all_mask_files)} masks")
 
     def _copy_training_masks_to_project(self, mask_files: list):
         """Copy user-provided training masks to project's masks folder.
