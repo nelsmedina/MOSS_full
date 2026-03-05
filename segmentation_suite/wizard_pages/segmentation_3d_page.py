@@ -35,7 +35,7 @@ class ConversionWorker(QThread):
 
     def run(self):
         try:
-            from em_pipeline.data.convert import convert as do_convert
+            from segmentation_suite.em_pipeline.data.convert import convert as do_convert
 
             def progress_callback(completed, total, msg):
                 if not self._stop:
@@ -84,7 +84,7 @@ class SegmentationWorker(QThread):
 
     def run(self):
         try:
-            from em_pipeline.pipeline import SegmentationPipeline, PipelineConfig
+            from segmentation_suite.em_pipeline.pipeline import SegmentationPipeline, PipelineConfig
 
             self.log.emit(f"Starting {self.strategy} segmentation...")
             self.log.emit(f"  Input: {self.input_path}")

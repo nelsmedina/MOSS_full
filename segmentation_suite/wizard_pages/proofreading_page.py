@@ -59,7 +59,7 @@ class ProofreadingWorker(QThread):
 
         try:
             # Import em_pipeline proofreading module
-            from em_pipeline.proofreading import MOSSBridge
+            from segmentation_suite.em_pipeline.proofreading import MOSSBridge
 
             project_dir = self.config.get('project_dir', '')
             num_samples = self.config.get('num_samples', 50)
@@ -343,7 +343,7 @@ class ProofreadingPage(QWidget):
         """Get or create the MOSS bridge."""
         if self._bridge is None:
             try:
-                from em_pipeline.proofreading import MOSSBridge
+                from segmentation_suite.em_pipeline.proofreading import MOSSBridge
 
                 project_dir = self.config.get('project_dir', '')
                 if not project_dir:

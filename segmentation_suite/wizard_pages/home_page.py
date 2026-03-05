@@ -37,8 +37,8 @@ class ZarrConversionWorker(QThread):
 
     def run(self):
         try:
-            from em_pipeline.data.pyramid import generate_ome_zarr_pyramid
-            from em_pipeline.data.convert import tiff_to_zarr
+            from segmentation_suite.em_pipeline.data.pyramid import generate_ome_zarr_pyramid
+            from segmentation_suite.em_pipeline.data.convert import tiff_to_zarr
             import os
             import psutil
             from pathlib import Path
@@ -137,7 +137,7 @@ class ZarrConversionWorker(QThread):
             # Generate pyramid levels
             self.log.emit(f"Step 2/2: Generating {self.num_levels - 1} pyramid levels...")
 
-            from em_pipeline.data.pyramid import generate_pyramid
+            from segmentation_suite.em_pipeline.data.pyramid import generate_pyramid
             generate_pyramid(
                 str(base_zarr),
                 str(dest_path),

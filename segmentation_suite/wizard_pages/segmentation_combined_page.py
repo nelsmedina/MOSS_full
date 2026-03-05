@@ -36,7 +36,7 @@ class ConversionWorker(QThread):
 
     def run(self):
         try:
-            from em_pipeline.data.convert import convert as do_convert
+            from segmentation_suite.em_pipeline.data.convert import convert as do_convert
 
             def progress_callback(completed, total, msg):
                 if not self._stop:
@@ -82,7 +82,7 @@ class SegmentationWorker(QThread):
 
     def run(self):
         try:
-            from em_pipeline.pipeline import SegmentationPipeline, PipelineConfig
+            from segmentation_suite.em_pipeline.pipeline import SegmentationPipeline, PipelineConfig
 
             self.log.emit(f"Starting {self.strategy} segmentation on {self.device}...")
 
@@ -523,7 +523,7 @@ class SegmentationTrainWorker(QThread):
             dataloader = DataLoader(dataset, batch_size=effective_batch_size, shuffle=True)
 
             # Create Joint LSD+FFN model
-            from em_pipeline.models.joint_lsd_ffn import JointLSDFFN, JointModelConfig
+            from segmentation_suite.em_pipeline.models.joint_lsd_ffn import JointLSDFFN, JointModelConfig
 
             config = JointModelConfig(
                 in_channels=1,
