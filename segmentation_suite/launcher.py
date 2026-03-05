@@ -73,17 +73,19 @@ def _show_terms_dialog(app: QApplication) -> bool:
     terms_text.setOpenExternalLinks(True)
     terms_text.setHtml("""
     <p style="font-size: 13px; line-height: 1.6; color: white;">
-    This code was written in collaboration with <b>Claude Code</b>.
+    <b>MOSS</b> is an open-source segmentation tool developed by the
+    <b>Kornfeld Lab</b> with assistance from AI coding tools.
     </p>
     <p style="font-size: 13px; line-height: 1.6; color: white;">
-    As a user, you should read every line and understand the code you are running.
+    This software is provided <b>as-is</b>, without warranty of any kind.
+    The authors are not liable for any damages arising from its use.
     </p>
     <p style="font-size: 13px; line-height: 1.6; color: white;">
-    By clicking <b>OK</b>, you agree to these terms and waive the moral right to
-    complain about the tool to the developer.
+    By clicking <b>Accept</b>, you acknowledge that you understand and accept
+    these conditions.
     </p>
     <p style="font-size: 13px; line-height: 1.6; color: white;">
-    As the code is open source, you are also a developer and can change the code freely.
+    This project is open source — contributions and feedback are welcome.
     </p>
     """)
     terms_text.setStyleSheet("""
@@ -106,7 +108,7 @@ def _show_terms_dialog(app: QApplication) -> bool:
     decline_btn.clicked.connect(dialog.reject)
     button_layout.addWidget(decline_btn)
 
-    accept_btn = QPushButton("OK - I Accept")
+    accept_btn = QPushButton("Accept")
     accept_btn.setMinimumWidth(120)
     accept_btn.setDefault(True)
     accept_btn.clicked.connect(dialog.accept)

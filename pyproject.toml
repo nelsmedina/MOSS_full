@@ -36,13 +36,15 @@ dependencies = [
     "Pillow>=9.0.0",
     "websockets>=12.0",
     "pyqtgraph>=0.13.0",
+    "psutil>=5.9.0",
+    "PyOpenGL>=3.1.0",
 ]
 
 [project.scripts]
 moss = "segmentation_suite.launcher:main"
 
 [project.urls]
-Homepage = "https://github.com/nelsmedina/MOSS"
+Homepage = "https://github.com/nelsmedina/MOSS_full"
 
 [tool.setuptools.packages.find]
 where = ["."]
