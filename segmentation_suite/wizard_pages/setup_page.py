@@ -103,15 +103,15 @@ class SetupPage(QWidget):
         self.interactive_check.stateChanged.connect(self._on_interactive_changed)
         data_layout.addRow("", self.interactive_check)
 
-        # Train masks
+        # Existing masks (user-provided predictions/annotations to load into project)
         self.train_masks = QLineEdit()
-        self.train_masks.setPlaceholderText("(Optional) Folder containing training masks")
+        self.train_masks.setPlaceholderText("(Optional) Folder with existing masks/predictions to import")
         self.train_mask_btn = QPushButton("Browse...")
-        self.train_mask_btn.clicked.connect(lambda: self._browse_folder(self.train_masks, "Select Training Masks Folder"))
+        self.train_mask_btn.clicked.connect(lambda: self._browse_folder(self.train_masks, "Select Existing Masks Folder"))
         train_mask_row = QHBoxLayout()
         train_mask_row.addWidget(self.train_masks)
         train_mask_row.addWidget(self.train_mask_btn)
-        data_layout.addRow("Training Masks:", train_mask_row)
+        data_layout.addRow("Existing Masks:", train_mask_row)
 
         # Validation images (optional)
         self.val_images = QLineEdit()
@@ -284,9 +284,9 @@ class SetupPage(QWidget):
         interactive = state == 2  # Qt.CheckState.Checked
         # When interactive is enabled, masks folder becomes optional
         if interactive:
-            self.train_masks.setPlaceholderText("(Optional) Folder containing training masks")
+            self.train_masks.setPlaceholderText("(Optional) Folder with existing masks/predictions to import")
         else:
-            self.train_masks.setPlaceholderText("Folder containing training masks - REQUIRED")
+            self.train_masks.setPlaceholderText("Folder with existing masks - REQUIRED")
 
     def get_config(self) -> dict:
         """Get the current configuration."""
@@ -328,11 +328,11 @@ class SetupPage(QWidget):
         # Masks are required only if not using interactive mode
         if not self.interactive_check.isChecked():
             if not self.train_masks.text():
-                return False, "Please select a training masks folder (or enable interactive painting)"
+                return False, "Please select an existing masks folder (or enable interactive painting)"
             if not os.path.isdir(self.train_masks.text()):
-                return False, "Training masks folder does not exist"
+                return False, "Existing masks folder does not exist"
         elif self.train_masks.text() and not os.path.isdir(self.train_masks.text()):
-            return False, "Training masks folder does not exist"
+            return False, "Existing masks folder does not exist"
 
         if self.model_type.currentIndex() == 1 and not os.path.isfile(self.checkpoint_path.text()):
             return False, "Checkpoint file does not exist"
