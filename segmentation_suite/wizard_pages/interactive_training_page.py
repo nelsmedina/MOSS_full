@@ -1560,6 +1560,36 @@ class InteractiveTrainingPage(QWidget):
             elif len(mask_files) > 0:
                 print(f"[TrainingMasks] WARNING: Mask count ({len(mask_files)}) != image count ({len(self.image_files)}), ignoring training masks")
 
+        # Auto-rename masks in masks/ folder if they don't match mask_XXXXX.tif pattern
+        # This handles the case where users copy-paste prediction masks with different names
+        if self.masks_dir and self.masks_dir.exists():
+            existing_standard = list(self.masks_dir.glob("mask_*.tif"))
+            if len(existing_standard) == 0:
+                all_mask_files = sorted([
+                    f for f in self.masks_dir.iterdir()
+                    if f.suffix.lower() in ('.tif', '.tiff', '.png', '.jpg', '.jpeg')
+                ])
+                if len(all_mask_files) > 0 and len(all_mask_files) == len(self.image_files):
+                    print(f"[Masks] Found {len(all_mask_files)} non-standard mask files, renaming to mask_XXXXX.tif...")
+                    for idx, src in enumerate(all_mask_files):
+                        dst = self.masks_dir / f"mask_{idx:05d}.tif"
+                        try:
+                            if src.suffix.lower() in ('.tif', '.tiff'):
+                                src.rename(dst)
+                            else:
+                                mask = np.array(Image.open(src))
+                                if mask.ndim == 3:
+                                    mask = mask[:, :, 0]
+                                if mask.max() > 0 and mask.max() <= 1:
+                                    mask = (mask * 255).astype(np.uint8)
+                                else:
+                                    mask = mask.astype(np.uint8)
+                                Image.fromarray(mask).save(dst, compression='tiff_lzw')
+                                src.unlink()
+                        except Exception as e:
+                            print(f"[Masks] Error renaming {src.name}: {e}")
+                    print(f"[Masks] Renamed {len(all_mask_files)} masks")
+
         # Clear existing data
         self.images = {}
         self.masks = {}
