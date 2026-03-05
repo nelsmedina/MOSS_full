@@ -196,8 +196,16 @@ def generate_pyramid(
 
         # Build metadata matching source format
         if zarr_v3 and source_metadata:
-            # Copy codec configuration from source
-            codecs = source_metadata.get('codecs', [])
+            # Copy codec configuration from source, adjusting inner chunk sizes
+            import copy
+            codecs = copy.deepcopy(source_metadata.get('codecs', []))
+            for codec in codecs:
+                if codec.get('name') == 'sharding_indexed':
+                    inner = codec.get('configuration', {}).get('chunk_shape')
+                    if inner:
+                        codec['configuration']['chunk_shape'] = [
+                            min(ic, ac) for ic, ac in zip(inner, adj_chunk_size)
+                        ]
 
             # Convert numpy dtype to Zarr v3 data type name
             dtype_np = np.dtype(dtype)

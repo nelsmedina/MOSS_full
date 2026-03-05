@@ -73,19 +73,13 @@ def _show_terms_dialog(app: QApplication) -> bool:
     terms_text.setOpenExternalLinks(True)
     terms_text.setHtml("""
     <p style="font-size: 13px; line-height: 1.6; color: white;">
-    <b>MOSS</b> is an open-source segmentation tool developed by the
-    <b>Kornfeld Lab</b> with assistance from AI coding tools.
+    <b>MOSS</b> was developed by the <b>Kornfeld Lab</b> with coding
+    assistance from <b>Claude</b> (Anthropic). Please keep this in mind
+    when using the software.
     </p>
     <p style="font-size: 13px; line-height: 1.6; color: white;">
-    This software is provided <b>as-is</b>, without warranty of any kind.
-    The authors are not liable for any damages arising from its use.
-    </p>
-    <p style="font-size: 13px; line-height: 1.6; color: white;">
-    By clicking <b>Accept</b>, you acknowledge that you understand and accept
-    these conditions.
-    </p>
-    <p style="font-size: 13px; line-height: 1.6; color: white;">
-    This project is open source — contributions and feedback are welcome.
+    Not all features have been fully tested. If you encounter any issues,
+    please report them.
     </p>
     """)
     terms_text.setStyleSheet("""
